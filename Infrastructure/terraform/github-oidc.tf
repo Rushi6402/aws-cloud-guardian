@@ -38,7 +38,7 @@ resource "aws_iam_role" "github_actions_role" {
           }
 
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:Rushi6402/aws-cloud-guardian:ref:refs/heads/main"
+            "token.actions.githubusercontent.com:sub" = "repo:Rushi6402/aws-cloud-guardian:*"
           }
         }
       }
