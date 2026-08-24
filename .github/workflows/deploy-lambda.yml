@@ -8,6 +8,8 @@ on:
       - 'Infrastructure/terraform/lambda.zip'
       - '.github/workflows/deploy-lambda.yml'
 
+  workflow_dispatch:
+
 permissions:
   id-token: write
   contents: read
