@@ -46,4 +46,4 @@ jobs:
             --function-name cloud-health-monitor \
             --query 'Configuration.[FunctionName,State,LastUpdateStatus]' \
             --output table
-```
+
