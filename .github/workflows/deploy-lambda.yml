@@ -10,6 +10,11 @@ on:
 
   workflow_dispatch:
 
+env:
+  AWS_REGION: us-east-1
+  ROLE_TO_ASSUME: arn:aws:iam::202197228781:role/cloud-health-monitor-github-deploy-role
+  ROLE_SESSION_NAME: GitHub_to_AWS_via_FederatedOIDC
+
 permissions:
   id-token: write
   contents: read
@@ -23,11 +28,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::202197228781:role/cloud-health-monitor-github-deploy-role
-          aws-region: us-east-1
-          role-session-name: GitHubActions-${{ github.run_id }}
+          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
+          role-session-name: ${{ env.ROLE_SESSION_NAME }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Verify AWS identity
         run: |
@@ -38,10 +43,3 @@ jobs:
           aws lambda update-function-code \
             --function-name cloud-health-monitor \
             --zip-file fileb://Infrastructure/terraform/lambda.zip
-
-      - name: Verify Lambda
-        run: |
-          aws lambda get-function \
-            --function-name cloud-health-monitor \
-            --query 'Configuration.[FunctionName,State,LastUpdateStatus]' \
-            --output table
