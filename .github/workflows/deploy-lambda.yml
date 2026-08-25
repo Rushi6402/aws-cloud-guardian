@@ -1,19 +1,45 @@
-name: Debug GitHub OIDC
+name: Deploy Lambda
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Infrastructure/terraform/lambda.zip'
+      - '.github/workflows/deploy-lambda.yml'
+
   workflow_dispatch:
 
 permissions:
   id-token: write
   contents: read
 
+env:
+  AWS_REGION: us-east-1
+  ROLE_TO_ASSUME: arn:aws:iam::202197228781:role/cloud-health-monitor-github-deploy-role
+
 jobs:
-  debug:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Debug OIDC claims
-        uses: github/actions-oidc-debugger@main
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+
+      - name: Verify AWS identity
+        run: |
+          aws sts get-caller-identity
+
+      - name: Deploy Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name cloud-health-monitor \
+            --zip-file fileb://Infrastructure/terraform/lambda.zip
