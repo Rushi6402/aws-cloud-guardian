@@ -36,17 +36,17 @@ jobs:
       - name: Verify Lambda function
         run: |
           aws lambda get-function \
-            --function-name cloud-health-monitor
+            --function-name aws-cloud-health-monitor
 
       - name: Deploy Lambda
         run: |
           aws lambda update-function-code \
-            --function-name cloud-health-monitor \
+            --function-name aws-cloud-health-monitor \
             --zip-file fileb://Infrastructure/terraform/lambda.zip
 
       - name: Verify deployment
         run: |
           aws lambda get-function \
-            --function-name cloud-health-monitor \
+            --function-name aws-cloud-health-monitor\
             --query 'Configuration.[FunctionName,Runtime,LastModified,State]' \
             --output table
