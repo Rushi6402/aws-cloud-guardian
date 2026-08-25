@@ -6,7 +6,7 @@ __pycache__/
 .terraform.lock.hcl
 .env
 .env.*
-*.zip
+
 .vscode/
 .terraform/
 *.tfstate
@@ -24,7 +24,7 @@ __pycache__/
 .env
 .env.*
 
-lambda.zip
+
 
 __pycache__/
 *.pyc
@@ -43,7 +43,7 @@ crash.*.log
 
 # Generated files
 response.json
-lambda.zip
+
 
 # Local environment
 .env
