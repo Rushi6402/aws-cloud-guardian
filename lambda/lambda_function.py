@@ -7,10 +7,12 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 REGION = "us-east-1"
+NAMESPACE = "AWS/CloudGuardian"
 
 ec2 = boto3.client("ec2", region_name=REGION)
 rds = boto3.client("rds", region_name=REGION)
 lambda_client = boto3.client("lambda", region_name=REGION)
+cloudwatch = boto3.client("cloudwatch", region_name=REGION)
 
 
 def check_ec2():
@@ -79,7 +81,6 @@ def check_lambda():
         response = lambda_client.list_functions()
 
         total = len(response["Functions"])
-
         active = 0
 
         for function in response["Functions"]:
@@ -101,6 +102,48 @@ def check_lambda():
             "status": "unhealthy",
             "error": str(e)
         }
+
+
+def publish_metrics(ec2_health, rds_health, lambda_health, overall_status):
+    try:
+        ec2_metric = 1 if ec2_health["status"] == "healthy" else 0
+
+        rds_metric = 1 if rds_health["status"] == "healthy" else 0
+
+        lambda_metric = 1 if lambda_health["status"] == "healthy" else 0
+
+        overall_metric = 1 if overall_status == "healthy" else 0
+
+        cloudwatch.put_metric_data(
+            Namespace=NAMESPACE,
+            MetricData=[
+                {
+                    "MetricName": "OverallHealth",
+                    "Value": overall_metric,
+                    "Unit": "Count"
+                },
+                {
+                    "MetricName": "EC2Health",
+                    "Value": ec2_metric,
+                    "Unit": "Count"
+                },
+                {
+                    "MetricName": "RDSHealth",
+                    "Value": rds_metric,
+                    "Unit": "Count"
+                },
+                {
+                    "MetricName": "LambdaHealth",
+                    "Value": lambda_metric,
+                    "Unit": "Count"
+                }
+            ]
+        )
+
+        logger.info("Custom CloudWatch metrics published successfully")
+
+    except Exception:
+        logger.exception("Failed to publish CloudWatch metrics")
 
 
 def lambda_handler(event, context):
@@ -141,6 +184,13 @@ def lambda_handler(event, context):
         "region": REGION,
         "checks": checks
     }
+
+    publish_metrics(
+        ec2_health,
+        rds_health,
+        lambda_health,
+        overall_status
+    )
 
     logger.info("Cloud Guardian health check completed")
     logger.info(json.dumps(result))

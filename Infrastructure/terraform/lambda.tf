@@ -17,6 +17,12 @@ resource "aws_lambda_function" "cloud_health_monitor" {
 
   timeout = 10
 
+  environment {
+    variables = {
+      SNS_TOPIC_ARN = aws_sns_topic.cloud_guardian_alerts.arn
+    }
+  }
+
   tags = {
     Project = "aws-cloud-health-monitor"
   }

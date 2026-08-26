@@ -9,3 +9,9 @@ variable "project_name" {
   type        = string
   default     = "aws-cloud-guardian"
 }
+
+variable "alert_email" {
+  description = "rushipatil8582@gmail.com"
+  type        = string
+  sensitive   = true
+}

@@ -53,3 +53,4 @@ response.json
 .DS_Store
 *.swp
 *.swo
+*.tfvars

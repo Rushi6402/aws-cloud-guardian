@@ -66,3 +66,51 @@ resource "aws_iam_role_policy" "cloud_guardian_read_only" {
     ]
   })
 }
+
+resource "aws_iam_role_policy" "cloud_guardian_sns" {
+  name = "CloudGuardianSNSPublish"
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Effect = "Allow"
+
+        Action = [
+          "sns:Publish"
+        ]
+
+        Resource = aws_sns_topic.cloud_guardian_alerts.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "cloud_guardian_cloudwatch" {
+  name = "CloudGuardianCloudWatchMetrics"
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Effect = "Allow"
+
+        Action = [
+          "cloudwatch:PutMetricData"
+        ]
+
+        Resource = "*"
+
+        Condition = {
+          StringEquals = {
+            "cloudwatch:namespace" = "AWS/CloudGuardian"
+          }
+        }
+      }
+    ]
+  })
+}
