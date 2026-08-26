@@ -54,3 +54,5 @@ response.json
 *.swp
 *.swo
 *.tfvars
+
+*.zip

@@ -4,22 +4,13 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'Infrastructure/terraform/lambda.zip'
-      - '.github/workflows/deploy-lambda.yml'
-
-  workflow_dispatch:
-
-permissions:
-  contents: read
 
 jobs:
   deploy:
-    name: Deploy Lambda
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
@@ -29,24 +20,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Verify AWS identity
+      - name: Create Lambda ZIP
         run: |
-          aws sts get-caller-identity
-
-      - name: Verify Lambda function
-        run: |
-          aws lambda get-function \
-            --function-name aws-cloud-health-monitor
+          cd lambda
+          zip ../lambda.zip lambda_function.py
 
       - name: Deploy Lambda
         run: |
           aws lambda update-function-code \
             --function-name aws-cloud-health-monitor \
-            --zip-file fileb://Infrastructure/terraform/lambda.zip
-
-      - name: Verify deployment
-        run: |
-          aws lambda get-function \
-            --function-name aws-cloud-health-monitor\
-            --query 'Configuration.[FunctionName,Runtime,LastModified,State]' \
-            --output table
+            --zip-file fileb://lambda.zip \
+            --region us-east-1
