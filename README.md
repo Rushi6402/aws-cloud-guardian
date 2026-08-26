@@ -123,16 +123,16 @@ The main objective of AWS Cloud Guardian is to build a lightweight cloud monitor
 
 ## 📊 CloudWatch Dashboard
 
-![AWS Cloud Guardian Dashboard](screenshots/cloudwatch-dashboard.png)
+![AWS Cloud Guardian Dashboard](screenshots/cloudwatch-dashboard.jpng)
 
 ## 🚨 CloudWatch Alarms
 
-![CloudWatch Alarms](screenshots/cloudwatch-alarms.png)
+![CloudWatch Alarms](screenshots/cloudwatch-alarms.jpng)
 
 ## ⚡ Lambda Health Monitor
 
-![Lambda](screenshots/lambda.png)
+![Lambda](screenshots/lambda.jpng)
 
 ## ⏰ EventBridge Schedule
 
-![EventBridge](screenshots/eventbridge.png)
+![EventBridge](screenshots/eventbridge.jpng)
