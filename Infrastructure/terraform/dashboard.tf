@@ -4,9 +4,9 @@ resource "aws_cloudwatch_dashboard" "cloud_guardian" {
   dashboard_body = jsonencode({
     widgets = [
 
-      # ---------------------------------------------------------
-      # Lambda Invocations
-      # ---------------------------------------------------------
+      # ==========================================================
+      # 1. Overall Health
+      # ==========================================================
       {
         type   = "metric"
         x      = 0
@@ -15,36 +15,32 @@ resource "aws_cloudwatch_dashboard" "cloud_guardian" {
         height = 6
 
         properties = {
-          title = "Cloud Guardian - Lambda Invocations"
+          title  = "Overall Health"
+          region = "us-east-1"
 
-          view   = "timeSeries"
-          region = var.aws_region
-
+          view   = "singleValue"
+          stat   = "Minimum"
           period = 300
-
-          stat = "Sum"
 
           metrics = [
             [
-              "AWS/Lambda",
-              "Invocations",
-              "FunctionName",
-              aws_lambda_function.cloud_health_monitor.function_name
+              "AWS/CloudGuardian",
+              "OverallHealth"
             ]
           ]
 
           yAxis = {
             left = {
-              label = "Invocations"
-              min   = 0
+              min = 0
+              max = 1
             }
           }
         }
       },
 
-      # ---------------------------------------------------------
-      # Lambda Errors
-      # ---------------------------------------------------------
+      # ==========================================================
+      # 2. Service Health
+      # ==========================================================
       {
         type   = "metric"
         x      = 12
@@ -53,36 +49,49 @@ resource "aws_cloudwatch_dashboard" "cloud_guardian" {
         height = 6
 
         properties = {
-          title = "Cloud Guardian - Lambda Errors"
+          title  = "Service Health"
+          region = "us-east-1"
 
           view   = "timeSeries"
-          region = var.aws_region
-
+          stat   = "Minimum"
           period = 300
-
-          stat = "Sum"
 
           metrics = [
             [
-              "AWS/Lambda",
-              "Errors",
-              "FunctionName",
-              aws_lambda_function.cloud_health_monitor.function_name
+              "AWS/CloudGuardian",
+              "EC2Health",
+              {
+                "label" = "EC2"
+              }
+            ],
+            [
+              "AWS/CloudGuardian",
+              "RDSHealth",
+              {
+                "label" = "RDS"
+              }
+            ],
+            [
+              "AWS/CloudGuardian",
+              "LambdaHealth",
+              {
+                "label" = "Lambda"
+              }
             ]
           ]
 
           yAxis = {
             left = {
-              label = "Errors"
-              min   = 0
+              min = 0
+              max = 1
             }
           }
         }
       },
 
-      # ---------------------------------------------------------
-      # Lambda Duration
-      # ---------------------------------------------------------
+      # ==========================================================
+      # 3. Lambda Errors
+      # ==========================================================
       {
         type   = "metric"
         x      = 0
@@ -91,74 +100,56 @@ resource "aws_cloudwatch_dashboard" "cloud_guardian" {
         height = 6
 
         properties = {
-          title = "Cloud Guardian - Lambda Duration"
+          title  = "Lambda Errors"
+          region = "us-east-1"
 
           view   = "timeSeries"
-          region = var.aws_region
-
+          stat   = "Sum"
           period = 300
 
-          stat = "Average"
+          metrics = [
+            [
+              "AWS/Lambda",
+              "Errors",
+              "FunctionName",
+              "aws-cloud-health-monitor"
+            ]
+          ]
+        }
+      },
+
+      # ==========================================================
+      # 4. Lambda Duration
+      # ==========================================================
+      {
+        type   = "metric"
+        x      = 12
+        y      = 6
+        width  = 12
+        height = 6
+
+        properties = {
+          title  = "Lambda Duration"
+          region = "us-east-1"
+
+          view   = "timeSeries"
+          stat   = "Average"
+          period = 300
 
           metrics = [
             [
               "AWS/Lambda",
               "Duration",
               "FunctionName",
-              aws_lambda_function.cloud_health_monitor.function_name
+              "aws-cloud-health-monitor"
             ]
           ]
-
-          yAxis = {
-            left = {
-              label = "Milliseconds"
-              min   = 0
-            }
-          }
         }
       },
 
-      # ---------------------------------------------------------
-      # Lambda Throttles
-      # ---------------------------------------------------------
-      {
-        type   = "metric"
-        x      = 12
-        y      = 6
-        width  = 12
-        height = 6
-
-        properties = {
-          title = "Cloud Guardian - Lambda Throttles"
-
-          view   = "timeSeries"
-          region = var.aws_region
-
-          period = 300
-
-          stat = "Sum"
-
-          metrics = [
-            [
-              "AWS/Lambda",
-              "Throttles",
-              "FunctionName",
-              aws_lambda_function.cloud_health_monitor.function_name
-            ]
-          ]
-
-          yAxis = {
-            left = {
-              label = "Throttles"
-              min   = 0
-            }
-          }
-        }
-      },
-
-      # ---------------------------------------------------------
-      # Lambda Concurrent Executions
-      # ---------------------------------------------------------
+      # ==========================================================
+      # 5. Lambda Invocations
+      # ==========================================================
       {
         type   = "metric"
         x      = 0
@@ -167,49 +158,11 @@ resource "aws_cloudwatch_dashboard" "cloud_guardian" {
         height = 6
 
         properties = {
-          title = "Cloud Guardian - Concurrent Executions"
+          title  = "Lambda Invocations"
+          region = "us-east-1"
 
           view   = "timeSeries"
-          region = var.aws_region
-
-          period = 300
-
-          stat = "Maximum"
-
-          metrics = [
-            [
-              "AWS/Lambda",
-              "ConcurrentExecutions",
-              "FunctionName",
-              aws_lambda_function.cloud_health_monitor.function_name
-            ]
-          ]
-
-          yAxis = {
-            left = {
-              label = "Executions"
-              min   = 0
-            }
-          }
-        }
-      },
-
-      # ---------------------------------------------------------
-      # Lambda Invocations vs Errors
-      # ---------------------------------------------------------
-      {
-        type   = "metric"
-        x      = 12
-        y      = 12
-        width  = 12
-        height = 6
-
-        properties = {
-          title = "Cloud Guardian - Invocations vs Errors"
-
-          view   = "timeSeries"
-          region = var.aws_region
-
+          stat   = "Sum"
           period = 300
 
           metrics = [
@@ -217,56 +170,38 @@ resource "aws_cloudwatch_dashboard" "cloud_guardian" {
               "AWS/Lambda",
               "Invocations",
               "FunctionName",
-              aws_lambda_function.cloud_health_monitor.function_name,
-              {
-                label = "Invocations"
-                stat  = "Sum"
-              }
-            ],
-            [
-              ".",
-              "Errors",
-              "FunctionName",
-              aws_lambda_function.cloud_health_monitor.function_name,
-              {
-                label = "Errors"
-                stat  = "Sum"
-              }
+              "aws-cloud-health-monitor"
             ]
           ]
         }
       },
 
-      # ---------------------------------------------------------
-      # Lambda Health Summary
-      # ---------------------------------------------------------
+      # ==========================================================
+      # 6. Lambda Throttles
+      # ==========================================================
       {
-        type   = "text"
-        x      = 0
-        y      = 18
-        width  = 24
-        height = 5
+        type   = "metric"
+        x      = 12
+        y      = 12
+        width  = 12
+        height = 6
 
         properties = {
-          markdown = <<-EOT
-            # 🛡️ AWS Cloud Guardian
+          title  = "Lambda Throttles"
+          region = "us-east-1"
 
-            **Monitoring Region:** `${var.aws_region}`
+          view   = "timeSeries"
+          stat   = "Sum"
+          period = 300
 
-            **Monitored Resources**
-
-            | Resource | Status |
-            |---|---|
-            | EC2 | 🔍 Health checked by Lambda |
-            | RDS | 🔍 Health checked by Lambda |
-            | Lambda | 🔍 Health checked by Lambda |
-            | EventBridge | ⏱️ Runs every 5 minutes |
-            | SNS | 📧 Sends unhealthy alerts |
-
-            **Lambda:** `${aws_lambda_function.cloud_health_monitor.function_name}`
-
-            **Project:** AWS Cloud Guardian
-          EOT
+          metrics = [
+            [
+              "AWS/Lambda",
+              "Throttles",
+              "FunctionName",
+              "aws-cloud-health-monitor"
+            ]
+          ]
         }
       }
     ]
